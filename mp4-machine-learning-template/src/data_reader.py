@@ -146,6 +146,7 @@ class DataReader:
                 selected_columns = df_feature.columns[df_feature.nunique() > 1].tolist()
             case 4:
                 variances = df_feature.var()
+                # Arbitrarily only take higher than average variance columns
                 cutoff = variances.quantile(0.5)
                 selected_columns = df_feature.columns[df_feature.var() > cutoff].tolist()
             case _:

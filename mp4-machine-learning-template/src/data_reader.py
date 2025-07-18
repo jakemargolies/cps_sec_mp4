@@ -116,7 +116,7 @@ class DataReader:
         self.X_tensor = torch.FloatTensor(self.X_normalized)
         self.y_tensor = torch.FloatTensor(self.labels_df.values)
 
-    def _find_important_features(self, df_feature: pd.DataFrame, df_labels: pd.DataFrame) -> list:
+    def _find_important_features(self, df_feature: pd.DataFrame, df_labels: pd.DataFrame, selection_method: int = 1) -> list:
         """
         Private method to identify and select important features from the dataset.
 
@@ -127,7 +127,31 @@ class DataReader:
             selected_columns (list): The list of selected feature column names that are most important for the model
         """
         # Please only complete or modify this method, i.e., _find_important_features method. Do not alter any other class methods or features in this file.
-        selected_columns = []  # COMPLETE HERE
+        # TODO: create a method of selecting what feature columns will be the best input to train our model
+        #  - Method 1: Use all available features, even constants and zero columns
+        #  - Method 2: No zeroes
+        #  - Method 3: Use features with non-constant value
+        #  - Method 4: high variance columns only
+        
+        # Init
+        selected_columns = []
+        # Switch
+        match selection_method:
+            case 1:
+                selected_columns = self.ALL_FEATURE_LIST
+            case 2:
+                selected_columns = df_feature.columns[(df_feature != 0).any()].tolist()
+            case 3:
+                # Only columns with more than one unique entry
+                selected_columns = df_feature.columns[df_feature.nunique() > 1].tolist()
+            case 4:
+                variances = df_feature.var()
+                cutoff = variances.quantile(0.5)
+                selected_columns = df_feature.columns[df_feature.var() > cutoff].tolist()
+            case _:
+                print(f"DataReader Warning: Invalid selection_method -- {selection_method}. Defaulting to all columns selected.")
+                selection_method = self.ALL_FEATURE_LIST
+                
         return selected_columns
 
     def _reduce_feature_space(self) -> None:
